@@ -1,11 +1,31 @@
 require 'ruby2d'
 
-set background: 'green'
+set background: 'black'
+
+PONG_SOUND = Sound.new('pong.wav')
+PING_SOUND = Sound.new('ping.wav')
+
+class DividingLine
+  WIDTH = 10
+  HEIGHT = 20
+  NUMBER_OF_LINES = 10
+
+  def draw
+    NUMBER_OF_LINES.times do |i|
+      Rectangle.new(x: (Window.width + WIDTH) / 2, y: (Window.height / NUMBER_OF_LINES) * i, height: HEIGHT, width: WIDTH, color: 'white')
+    end
+  end
+
+end
 
 class Paddle
   HEIGHT = 150
+  JITTER_CORRECTION = 4
   attr_writer :direction
+  attr_reader :side
+
   def initialize(side, movement_speed)
+    @side = side
     @movement_speed = movement_speed
     @direction = nil
     @y = 200
@@ -37,11 +57,15 @@ class Paddle
   end
 
   def track_ball(ball)
-    if ball.y_middle > y_middle
+    if ball.y_middle > y_middle + JITTER_CORRECTION
       @y += @movement_speed
-    elsif ball.y_middle < y_middle
+    elsif ball.y_middle < y_middle - JITTER_CORRECTION
       @y -= @movement_speed
     end
+  end
+
+  def y1
+    @shape.y1
   end
 
   private
@@ -60,12 +84,14 @@ class Ball
   def initialize(speed)
     @x = 320
     @y = 400
+    @speed = speed
     @y_velocity = speed
     @x_velocity = -speed
   end
 
   def move
     if hit_bottom? || hit_top?
+      PONG_SOUND.play
       @y_velocity = -@y_velocity
     end
 
@@ -74,11 +100,24 @@ class Ball
   end
 
   def draw
-    @shape = Square.new(x: @x, y: @y, size: 25, color: 'yellow')
+    @shape = Square.new(x: @x, y: @y, size: 25, color: 'white')
   end
 
-  def bounce
-    @x_velocity = -@x_velocity
+  def bounce_off(paddle)
+    if @last_hit_side != paddle.side
+      position = ((@shape.y1 - paddle.y1) / Paddle::HEIGHT.to_f)
+      angle = position.clamp(0.2, 0.8) * Math::PI
+
+      if paddle.side == :left
+        @x_velocity = Math.sin(angle) * @speed
+        @y_velocity = Math.cos(angle) *@speed
+      else
+        @x_velocity = -Math.sin(angle) * @speed
+        @y_velocity = -Math.cos(angle) *@speed
+      end
+
+      @last_hit_side = paddle.side
+    end
   end
 
   def y_middle
@@ -108,8 +147,14 @@ ball = Ball.new(ball_velocity)
 
 update do
   clear
-  if player.hit_ball?(ball) || opponent.hit_ball?(ball)
-    ball.bounce
+  DividingLine.new.draw
+  if player.hit_ball?(ball)
+    ball.bounce_off(player)
+    PING_SOUND.play
+  end
+  if opponent.hit_ball?(ball)
+    ball.bounce_off(opponent)
+    PING_SOUND.play
   end
 
   player.move
@@ -126,7 +171,7 @@ update do
   end
 end
 
-on :key_down do |event|
+on :key_held do |event|
   if event.key == 'up'
     player.direction = :up
   elsif event.key == 'down'
