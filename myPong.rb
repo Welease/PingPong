@@ -24,6 +24,7 @@ class Paddle
     end
   end
 
+
   def draw
     @shape = Rectangle.new(x: @x, y: @y, width: 25, height: HEIGHT, color: 'white')
   end
