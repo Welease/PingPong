@@ -29,9 +29,9 @@ class NextCoordinates
 
   def x_length
     if @x_velocity > 0
-      (Window.width - Paddle::X_OFFSET - @x) / @x_velocity
+      (Window.width - Player::X_OFFSET - @x) / @x_velocity
     else
-      (@x - Paddle::X_OFFSET) / -@x_velocity
+      (@x - Player::X_OFFSET) / -@x_velocity
     end
   end
 
@@ -78,7 +78,7 @@ class DividingLine
   end
 end
 
-class Paddle
+class Player
   HEIGHT = 150
   JITTER_CORRECTION = 4
   X_OFFSET = 40
@@ -168,7 +168,7 @@ class Ball
 
   def bounce_off(paddle)
     if @last_hit_side != paddle.side
-      position = ((@shape.y1 - paddle.y1) / Paddle::HEIGHT.to_f)
+      position = ((@shape.y1 - paddle.y1) / Player::HEIGHT.to_f)
       angle = position.clamp(0.2, 0.8) * Math::PI
 
       if paddle.side == :left
@@ -210,8 +210,8 @@ end
 
 ball_velocity = 8
 
-player = Paddle.new(:left, 5)
-opponent = Paddle.new(:right, 3)
+player = Player.new(:left, 5)
+opponent = Player.new(:right, 3)
 ball = Ball.new(ball_velocity)
 ball_trajectory = BallTrajectory.new(ball)
 
