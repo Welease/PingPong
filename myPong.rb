@@ -99,7 +99,7 @@ class Ball
   end
 
   def draw
-    @shape = Square.new(x: @x, y: @y, weight: 10, height: 10, color: 'white')
+    @shape = Circle.new(x: @x, y: @y, radius: 10, color: 'white')
   end
 
   def bounce_off(paddle)
