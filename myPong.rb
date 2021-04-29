@@ -6,9 +6,9 @@ PONG_SOUND = Sound.new('pong.wav')
 PING_SOUND = Sound.new('ping.wav')
 
 class DividingLine
-  WIDTH = 10
-  HEIGHT = 20
-  NUMBER_OF_LINES = 10
+  WIDTH = 2
+  HEIGHT = 13
+  NUMBER_OF_LINES = 20
 
   def draw
     NUMBER_OF_LINES.times do |i|
@@ -19,7 +19,7 @@ class DividingLine
 end
 
 class Paddle
-  HEIGHT = 150
+  HEIGHT = 65
   JITTER_CORRECTION = 4
   attr_writer :direction
   attr_reader :side
@@ -46,11 +46,12 @@ class Paddle
 
 
   def draw
-    @shape = Rectangle.new(x: @x, y: @y, width: 25, height: HEIGHT, color: 'white')
+    @shape = Rectangle.new(x: @x, y: @y, width: 10, height: HEIGHT, color: 'white')
   end
 
   def hit_ball?(ball)
-    ball.shape && [[ball.shape.x, ball.shape.y]].any? do |coordinates|
+    ball.shape && [[ball.shape.x1, ball.shape.y1], [ball.shape.x2, ball.shape.y2],
+                   [ball.shape.x3, ball.shape.y3], [ball.shape.x4, ball.shape.y4]].any? do |coordinates|
       @shape.contains?(coordinates[0], coordinates[1])
     end
   end
@@ -99,7 +100,7 @@ class Ball
   end
 
   def draw
-    @shape = Circle.new(x: @x, y: @y, radius: 10, color: 'white')
+    @shape = Square.new(x: @x, y: @y, size: 10, color: 'white')
   end
 
   def bounce_off(paddle)
@@ -138,10 +139,10 @@ class Ball
   end
 end
 
-ball_velocity = 6
+ball_velocity = 8
 
-player = Paddle.new(:left, 5)
-opponent = Paddle.new(:right, 4)
+player = Paddle.new(:left, 6)
+opponent = Paddle.new(:right, 6)
 ball = Ball.new(ball_velocity)
 
 update do
